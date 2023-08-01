@@ -2,7 +2,7 @@
   <div
     id="drag-card"
     class="draggable-card"
-    :class="{ 'red-shadow': hasError,'green-shadow': !hasError }"
+    :class="{ 'red-shadow': hasError,'green-shadow': !hasError, 'dragging': isDragging}"
     @mousedown="dragStart" @mousemove="dragging" @mouseup="dragEnd"
     :style="{ top: cardPosition.top + 'px', left: cardPosition.left + 'px' }"
   >
@@ -52,21 +52,29 @@ const dragStart = (event) => {
   isDragging.value = true;
   cardPosition.startX = event.clientX - cardPosition.left;
   cardPosition.startY = event.clientY - cardPosition.top;
+  document.addEventListener('mousemove', dragging);
+  document.addEventListener('mouseup', dragEnd);
 }
 
 const dragging = (event) => {
   if (!isDragging.value) return;
-  // 拖动结束时 边界检测
       // 更新卡片的位置
   // const target = event.target;
-  cardPosition.left = event.clientX - cardPosition.startX;
-  cardPosition.top = event.clientY - cardPosition.startY;
+  requestAnimationFrame(()=> {
+    cardPosition.left = event.clientX - cardPosition.startX;
+    cardPosition.top = event.clientY - cardPosition.startY;
+  })
 }
 const dragEnd = () => {
   isDragging.value = false
+  document.removeEventListener('mousemove', dragging);
+  document.removeEventListener('mouseup', dragEnd);
 }
 </script>
 <style lang="less" scoped>
+.dragging {
+  // cursor: none;
+}
 .draggable-card {
   width: 400px;
   position: absolute;
@@ -76,6 +84,7 @@ const dragEnd = () => {
   z-index: 999;
   border-radius: 8px;
   box-shadow: 4px 4px 14px #888;
+  backface-visibility: hidden;
   
   
   .header {
